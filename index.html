@@ -266,16 +266,24 @@ function renderSuggestions(){
 function useSuggestion(text){document.getElementById('userInput').value=text;sendMessage();}
 
 function parseSentiment(text){
-  // Remove the sentiment tag and extract value
-  const m=text.match(/\[SENTIMENT[\s:]*([^\]]+)\]/i);
-  if(!m){return{sentiment:'neu',clean:text};}
-  const raw=m[1].trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  let s='neu';
-  if(raw.startsWith('pos'))s='pos';
-  else if(raw.startsWith('neg'))s='neg';
-  // neutre/neutral/neutro/neu all stay 'neu'
-  const clean=text.replace(/\n?\[SENTIMENT[^\]]*\]/gi,'').trim();
-  return{sentiment:s,clean};
+  if(!text) return {sentiment:'neu', clean:'…'};
+  const m = text.match(/\[SENTIMENT[^:]*[:：\s]*([^\]]+)\]/i);
+  let s = 'neu';
+  if(m){
+    const raw = m[1].trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(raw.startsWith('pos')) s = 'pos';
+    else if(raw.startsWith('neg')) s = 'neg';
+  }
+  // Nettoie TOUS les patterns possibles du tag sentiment
+  let clean = text
+    .replace(/\n?\[SENTIMENT[^\]]*\]/gi, '')
+    .replace(/\n?\[sentiment[^\]]*\]/gi, '')
+    .trim();
+  // Fallback si clean est vide
+  if(!clean) clean = text.replace(/\[[^\]]*\]/gi,'').trim();
+  if(!clean) clean = '…';
+  return {sentiment: s, clean};
 }
 function updateSentiment(s){sentimentCounts[s]++;renderDash('dashContentDesktop');}
 function getSentLabel(s){return{pos:'Positif 😊',neu:'Neutre 😐',neg:'Négatif 😟'}[s]||'';}
