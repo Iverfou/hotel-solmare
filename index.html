@@ -353,8 +353,8 @@ async function sendMessage(){
   try{
     const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:langConfig[currentLang].systemPrompt,messages:conversationHistory})});
     const data=await res.json();
-    const raw=data.content?.[0]?.text||'…';
-    const{sentiment,clean}=parseSentiment(raw);
+    cconst raw = data.content?.[0]?.text || '…';
+console.log('RAW response:', raw); // ← debug, à retirer après;
     removeTyping();addBotMessage(clean,sentiment);updateSentiment(sentiment);
     conversationHistory.push({role:'assistant',content:raw});
     addLog('Sofia → '+getSentLabel(sentiment));
