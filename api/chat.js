@@ -1,6 +1,4 @@
-
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -17,7 +15,6 @@ export default async function handler(req, res) {
 
   try {
     const { messages, system } = req.body;
-
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -32,15 +29,11 @@ export default async function handler(req, res) {
         messages
       })
     });
-
     const data = await response.json();
-
     if (!response.ok) {
       return res.status(response.status).json({ error: data });
     }
-
     return res.status(200).json(data);
-
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
