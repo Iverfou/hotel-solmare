@@ -353,12 +353,19 @@ async function sendMessage(){
   try{
     const res=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:langConfig[currentLang].systemPrompt,messages:conversationHistory})});
     const data=await res.json();
-    cconst raw = data.content?.[0]?.text || '…';
-console.log('RAW response:', raw); // ← debug, à retirer après;
+    if(!res.ok||data.error){
+      removeTyping();
+      addBotMessage('Erreur API : '+(data.error?.message||JSON.stringify(data.error)),null);
+      addLog('Erreur API');
+      isTyping=false;document.getElementById('sendBtn').disabled=false;
+      return;
+    }
+    const raw=data.content?.[0]?.text||'…';
+    const{sentiment,clean}=parseSentiment(raw);
     removeTyping();addBotMessage(clean,sentiment);updateSentiment(sentiment);
     conversationHistory.push({role:'assistant',content:raw});
     addLog('Sofia → '+getSentLabel(sentiment));
-  }catch(err){removeTyping();addBotMessage('Désolée, une erreur est survenue.',null);addLog('Erreur API');}
+  }catch(err){removeTyping();addBotMessage('Désolée, une erreur est survenue : '+err.message,null);addLog('Erreur API');}
   isTyping=false;document.getElementById('sendBtn').disabled=false;input.focus();
 }
 
